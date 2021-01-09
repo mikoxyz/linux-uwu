@@ -13,7 +13,7 @@ while true; do
     read input
     if [ "$input" = "y" ]; then
         echo "Installing the build dependencies..."
-        sudo apt-get update && sudo apt-get install build-essential && sudo apt-get build-dep linux
+        sudo apt-get update && sudo apt-get install build-essential -y && sudo apt-get build-dep linux -y
         break
     elif [ "$input" = "n" ]; then
         break
