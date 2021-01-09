@@ -24,8 +24,16 @@ done
 
 echo "Cloning the configs repo..."
 git clone git@github.com:mikoxyz/linux-uwu-configs
-echo "Copying the config to .config..."
-cp linux-uwu-configs/config-5.10.4-uwu .config
+
+# Check if host CPU is Intel and use the Intel config if that's the case. Otherwise, use the normal config
+if lscpu | grep -q Intel; then
+    echo "Copying the Intel config to .config..."
+    cp linux-uwu-configs/config-5.10.4-uwu-intel .config
+elif :; then
+    echo "Copying the normal config to .config..."
+    cp linux-uwu-configs/config-5.10.4-uwu .config
+fi
+
 echo "Starting the build..."
 make -j`nproc` bindeb-pkg LOCALVERSION=-uwu
 echo "Done!"
