@@ -1,9 +1,14 @@
 #!/bin/sh
 
 # Check if git is installed
-if !  [ -x "$(command -v git)" ]; then
+if ! [ -x "$(command -v git)" ]; then
     echo "git is not installed on your system. Please install git using your package manager."
     exit 1
+fi
+
+# Run figlet if it's present (I only added this because I wanted to try out git's gpg signing feature; also, it just looks really neat :p)
+if [ -x "$(command -v figlet)" ]; then
+    figlet linux-uwu 5.10.4
 fi
 
 echo "Welcome to the linux-uwu build script!\nDo you want to install the build dependencies? [y/n]"
