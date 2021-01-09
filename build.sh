@@ -1,21 +1,28 @@
 #!/bin/sh
 
 # Check if git is installed
-if !  [ -x "$(command -v git)" ]
-then
+if !  [ -x "$(command -v git)" ]; then
     echo "git is not installed on your system. Please install git using your package manager."
     exit 1
 fi
 
-echo "Welcome to the linux-uwu build script!\nThis build assumes that you have build-essential and the build dependencies for Linux installed.\nPress y if you do, press n if you don't."
-read input
-if [ "$input" = "n" ]
-then
-    echo "Exiting the build script..."
-    exit 0
-fi
+echo "Welcome to the linux-uwu build script!\nDo you want to install the build dependencies? [y/n]"
 
-echo "Clong the configs repo..."
+# This is probably really hacky, but it works ¯\_(ツ)_/¯
+while true; do
+    read input
+    if [ "$input" = "y" ]; then
+        echo "Installing the build dependencies..."
+        sudo apt-get update && sudo apt-get install build-essential && sudo apt-get build-dep linux
+        break
+    elif [ "$input" = "n" ]; then
+        break
+    elif [ "$input" != "y" ] || [ "$input" != "n" ]; then
+        echo "Please enter 'y' or 'n'."
+    fi
+done
+
+echo "Cloning the configs repo..."
 git clone git@github.com:mikoxyz/linux-uwu-configs
 echo "Copying the config to .config..."
 cp linux-uwu-configs/config-5.10.4-uwu .config
