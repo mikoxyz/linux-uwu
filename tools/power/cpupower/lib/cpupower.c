@@ -14,7 +14,6 @@
 #include "cpupower.h"
 #include "cpupower_intern.h"
 
-__attribute__((visibility("hidden")))
 unsigned int cpupower_read_sysfs(const char *path, char *buf, size_t buflen)
 {
 	int fd;

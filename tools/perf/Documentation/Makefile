@@ -132,9 +132,6 @@ endif
 ifdef DOCBOOK_SUPPRESS_SP
 XMLTO_EXTRA += -m manpage-suppress-sp.xsl
 endif
-ifdef KBUILD_BUILD_TIMESTAMP
-ASCIIDOC_EXTRA += -a revdate=$(shell date -u -d '$(KBUILD_BUILD_TIMESTAMP)' +%Y-%m-%d)
-endif
 
 SHELL_PATH ?= $(SHELL)
 # Shell quote;

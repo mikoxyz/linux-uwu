@@ -50,18 +50,6 @@
 #include "json.h"
 #include "pmu-events.h"
 
-struct ordered_ftw_entry {
-	const char	*fpath;
-	int		typeflag;
-	struct FTW	ftwbuf;
-};
-
-struct ordered_ftw_state {
-	struct ordered_ftw_entry *entries;
-	size_t		n;
-	size_t		max;
-};
-
 int verbose;
 char *prog;
 
@@ -917,78 +905,6 @@ static int get_maxfds(void)
  */
 static FILE *eventsfp;
 static char *mapfile;
-static struct ordered_ftw_state *ordered_ftw_state;
-
-static int ordered_ftw_add(const char *fpath, const struct stat *sb,
-			   int typeflag, struct FTW *ftwbuf)
-{
-	struct ordered_ftw_state *state = ordered_ftw_state;
-	struct ordered_ftw_entry *entry;
-
-	if (ftwbuf->level == 0 || ftwbuf->level > 3)
-		return 0;
-
-	/* Grow array if necessary */
-	if (state->n >= state->max) {
-		if (state->max == 0)
-			state->max = 16;
-		else
-			state->max *= 2;
-		state->entries = realloc(state->entries,
-					 state->max * sizeof(*state->entries));
-	}
-
-	entry = &state->entries[state->n++];
-	entry->fpath = strdup(fpath);
-	entry->typeflag = typeflag;
-	entry->ftwbuf = *ftwbuf;
-
-	return 0;
-}
-
-static int ordered_ftw_compare(const void *left, const void *right)
-{
-	const struct ordered_ftw_entry *left_entry = left;
-	const struct ordered_ftw_entry *right_entry = right;
-
-	return strcmp(left_entry->fpath, right_entry->fpath);
-}
-
-/*
- * Wrapper for nftw() that iterates files in ASCII-order to ensure
- * reproducible output
- */
-static int ordered_ftw(const char *dirpath,
-		       int (*fn)(const char *, int, struct FTW *),
-		       int nopenfd)
-{
-	struct ordered_ftw_state state = { NULL, 0, 0 };
-	size_t i;
-	int rc;
-
-	ordered_ftw_state = &state;
-	rc = nftw(dirpath, ordered_ftw_add, nopenfd, 0);
-	if (rc)
-		goto out;
-
-	qsort(state.entries, state.n, sizeof(*state.entries),
-	      ordered_ftw_compare);
-
-	for (i = 0; i < state.n; i++) {
-		rc = fn(state.entries[i].fpath,
-			state.entries[i].typeflag,
-			&state.entries[i].ftwbuf);
-		if (rc)
-			goto out;
-	}
-
-out:
-	for (i = 0; i < state.n; i++)
-		free(state.entries[i].fpath);
-	free(state.entries);;
-
-	return rc;
-}
 
 static int is_leaf_dir(const char *fpath)
 {
@@ -1041,19 +957,19 @@ static int is_json_file(const char *name)
 	return 0;
 }
 
-static int preprocess_arch_std_files(const char *fpath,
+static int preprocess_arch_std_files(const char *fpath, const struct stat *sb,
 				int typeflag, struct FTW *ftwbuf)
 {
 	int level = ftwbuf->level;
 	int is_file = typeflag == FTW_F;
 
 	if (level == 1 && is_file && is_json_file(fpath))
-		return json_events(fpath, save_arch_std_events, NULL);
+		return json_events(fpath, save_arch_std_events, (void *)sb);
 
 	return 0;
 }
 
-static int process_one_file(const char *fpath,
+static int process_one_file(const char *fpath, const struct stat *sb,
 			    int typeflag, struct FTW *ftwbuf)
 {
 	char *tblname, *bname;
@@ -1078,9 +994,9 @@ static int process_one_file(const char *fpath,
 	} else
 		bname = (char *) fpath + ftwbuf->base;
 
-	pr_debug("%s %d %-20s %s\n",
+	pr_debug("%s %d %7jd %-20s %s\n",
 		 is_file ? "f" : is_dir ? "d" : "x",
-		 level, bname, fpath);
+		 level, sb->st_size, bname, fpath);
 
 	/* base dir or too deep */
 	if (level == 0 || level > 3)
@@ -1235,7 +1151,7 @@ int main(int argc, char *argv[])
 
 	maxfds = get_maxfds();
 	mapfile = NULL;
-	rc = ordered_ftw(ldirname, preprocess_arch_std_files, maxfds);
+	rc = nftw(ldirname, preprocess_arch_std_files, maxfds, 0);
 	if (rc && verbose) {
 		pr_info("%s: Error preprocessing arch standard files %s\n",
 			prog, ldirname);
@@ -1249,7 +1165,7 @@ int main(int argc, char *argv[])
 		goto empty_map;
 	}
 
-	rc = ordered_ftw(ldirname, process_one_file, maxfds);
+	rc = nftw(ldirname, process_one_file, maxfds, 0);
 	if (rc && verbose) {
 		pr_info("%s: Error walking file tree %s\n", prog, ldirname);
 		goto empty_map;
@@ -1265,7 +1181,7 @@ int main(int argc, char *argv[])
 
 	sprintf(ldirname, "%s/test", start_dirname);
 
-	rc = ordered_ftw(ldirname, process_one_file, maxfds);
+	rc = nftw(ldirname, process_one_file, maxfds, 0);
 	if (rc && verbose) {
 		pr_info("%s: Error walking file tree %s rc=%d for test\n",
 			prog, ldirname, rc);

@@ -210,10 +210,9 @@ void __init efi_init(void)
 {
 	struct efi_memory_map_data data;
 	u64 efi_system_table;
-	u32 secure_boot;
 
 	/* Grab UEFI information placed in FDT by stub */
-	efi_system_table = efi_get_fdt_params(&data, &secure_boot);
+	efi_system_table = efi_get_fdt_params(&data);
 	if (!efi_system_table)
 		return;
 
@@ -234,8 +233,6 @@ void __init efi_init(void)
 		efi_memmap_unmap();
 		return;
 	}
-
-	efi_set_secure_boot(secure_boot);
 
 	reserve_regions();
 	efi_esrt_init();
