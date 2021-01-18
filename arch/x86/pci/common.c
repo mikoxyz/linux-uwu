@@ -21,8 +21,8 @@
 #include <asm/setup.h>
 #include <asm/irqdomain.h>
 
-unsigned int pci_probe = PCI_PROBE_BIOS | PCI_PROBE_CONF1 | PCI_PROBE_CONF2 |
-				PCI_PROBE_MMCONF;
+unsigned int pci_probe = PCI_PROBE_CONF1 | PCI_PROBE_CONF2 | PCI_PROBE_MMCONF |
+	(IS_ENABLED(CONFIG_X86_64) || IS_ENABLED(CONFIG_X86_PAE) ? 0 : PCI_PROBE_BIOS);
 
 static int pci_bf_sort;
 int pci_routeirq;
