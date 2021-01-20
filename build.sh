@@ -1,5 +1,7 @@
 #!/bin/sh
 
+KERNEL_VER=5.10.9
+
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
     echo "git is not installed on your system. Please install git using your package manager."
@@ -8,7 +10,7 @@ fi
 
 # Run figlet if it's present (I only added this because I wanted to try out git's gpg signing feature; also, it just looks really neat :p)
 if [ -x "$(command -v figlet)" ]; then
-    figlet linux-uwu 5.10.8
+    figlet linux-uwu $KERNEL_VER
 fi
 
 echo "Welcome to the linux-uwu build script!\nDo you want to install the build dependencies? [y/n]"
@@ -33,14 +35,15 @@ git clone git@github.com:mikoxyz/linux-uwu-configs
 # Check if host CPU is Intel and use the Intel config if that's the case. Otherwise, use the normal config
 if lscpu | grep -q Intel; then
     echo "Copying the Intel config to .config..."
-    cp linux-uwu-configs/config-5.10.8-uwu-intel .config
+    cp linux-uwu-configs/config-$KERNEL_VER-uwu-intel .config
 elif :; then
     echo "Copying the normal config to .config..."
-    cp linux-uwu-configs/config-5.10.8-uwu .config
+    cp linux-uwu-configs/config-$KERNEL_VER-uwu .config
 fi
 
 echo "Starting the build..."
 make -j`nproc` bindeb-pkg LOCALVERSION=-uwu
+unset KERNEL_VER
 echo "Done!"
 
 exit 0
