@@ -1,6 +1,6 @@
 #!/bin/sh
 
-KERNEL_VER=5.10.9
+KERNEL_VER=5.10.10
 
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
