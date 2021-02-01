@@ -4,7 +4,7 @@ KERNEL_VER=5.10.12
 
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
-    echo "git is not installed on your system. Please install git using your package manager."
+    printf "git is not installed on your system. Please install git using your package manager.\n"
     exit 1
 fi
 
@@ -13,19 +13,19 @@ if [ -x "$(command -v figlet)" ]; then
     figlet linux-uwu $KERNEL_VER
 fi
 
-echo "Welcome to the linux-uwu build script!\nDo you want to install the build dependencies? [y/n]"
+printf "Welcome to the linux-uwu build script!\nDo you want to install the build dependencies? [y/n] "
 
 # This is probably really hacky, but it works ¯\_(ツ)_/¯
 while true; do
     read input
     if [ "$input" = "y" ]; then
-        echo "Installing the build dependencies..."
+        printf "Installing the build dependencies..."
         sudo apt-get update && sudo apt-get install build-essential -y && sudo apt-get build-dep linux -y
         break
     elif [ "$input" = "n" ]; then
         break
     elif [ "$input" != "y" ] || [ "$input" != "n" ]; then
-        echo "Please enter 'y' or 'n'."
+        printf "Please enter 'y' or 'n'."
     fi
 done
 
