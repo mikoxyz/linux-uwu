@@ -25,7 +25,7 @@ while true; do
     elif [ "$input" = "n" ]; then
         break
     elif [ "$input" != "y" ] || [ "$input" != "n" ]; then
-        printf "Please enter 'y' or 'n'."
+        printf "Please enter 'y' or 'n'.\n"
     fi
 done
 
