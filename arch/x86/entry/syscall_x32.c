@@ -42,7 +42,7 @@ asmlinkage const sys_call_ptr_t x32_sys_call_table[__NR_x32_syscall_max+1] = {
 	[0 ... __NR_x32_syscall_max] = &__x64_sys_ni_syscall,
 #include <asm/syscalls_64.h>
 };
- 
+
 /* Maybe enable x32 syscalls */
 
 #if defined(CONFIG_X86_X32_DISABLED)

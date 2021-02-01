@@ -593,6 +593,17 @@ config X86_USE_3DNOW
 	def_bool y
 	depends on (MCYRIXIII || MK7 || MGEODE_LX) && !X86_GENERIC && !UML
 
+#
+# P6_NOPs are a relatively minor optimization that require a family >=
+# 6 processor, except that it is broken on certain VIA chips.
+# Furthermore, AMD chips prefer a totally different sequence of NOPs
+# (which work on all CPUs).  In addition, it looks like Virtual PC
+# does not understand them.
+#
+# As a result, disallow these if we're not compiling for X86_64 (these
+# NOPs do work on all x86-64 capable chips); the list of processors in
+# the right-hand clause are the cores that benefit from this optimization.
+#
 config X86_P6_NOP
 	default n
 	bool "Support for P6_NOPs on Intel chips"
