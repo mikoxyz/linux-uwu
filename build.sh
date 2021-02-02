@@ -1,6 +1,7 @@
 #!/bin/sh
 
-KERNEL_VER=5.10.12
+KVER=5.10.12
+PKGVER=2
 
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
@@ -39,15 +40,16 @@ git clone git@github.com:mikoxyz/linux-uwu-configs
 # Otherwise, use the normal config
 if lscpu | grep -q Intel; then
 	echo "Copying the Intel config to .config..."
-	cp linux-uwu-configs/config-${KERNEL_VER}-uwu-intel .config
+	cp linux-uwu-configs/config-${KVER}-uwu-intel .config
 elif :; then
 	echo "Copying the normal config to .config..."
-	cp linux-uwu-configs/config-${KERNEL_VER}-uwu .config
+	cp linux-uwu-configs/config-${KVER}-uwu .config
 fi
 
 echo "Starting the build..."
-make -j`nproc` bindeb-pkg LOCALVERSION=-uwu
-unset KERNEL_VER
+make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-${PKGVER}
+unset KVER
+unset PKGVER
 echo "Done!"
 
 exit 0
