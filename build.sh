@@ -12,7 +12,7 @@ fi
 
 # Run figlet if it's present
 if [ -x "$(command -v figlet)" ]; then
-	figlet linux-uwu $KERNEL_VER
+	figlet linux-uwu $KVER
 fi
 
 printf "Welcome to the linux-uwu build script!\n\
