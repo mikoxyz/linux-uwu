@@ -46,7 +46,7 @@ elif :; then
 	cp linux-uwu-configs/config-${KVER}-uwu .config
 fi
 
-printf "Starting the build..."
+printf "Starting the build...\n"
 make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-${PKGVER}
 unset KVER
 unset PKGVER
