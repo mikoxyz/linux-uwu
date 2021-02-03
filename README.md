@@ -8,7 +8,7 @@ Note: linux-uwu has only been tested on Debian sid running on amd64, so I can't 
 
 > Q: Why does this exist when Liquorix/zen exists?
 
-A: Partly because I just enjoy doing this, and partly because Liquorix/zen is kind of slow (see [this article](https://www.phoronix.com/scan.php?page=article&item=radeon-gaming-liquorix54)), and the latency is noticeably higher than on a standard low-latency kernel. This is, as far as I know, caused by the BFQ scheduler, which is still not as mature as the default CFQ scheduler. I could be wrong, though.
+A: Partly because I just enjoy doing this, and partly because Liquorix/zen is kind of slow (see [this article](https://www.phoronix.com/scan.php?page=article&item=radeon-gaming-liquorix54)), and the latency is noticeably higher than on a standard low-latency kernel. This is, as far as I know, caused by the BMQ scheduler, which is still not as mature as the default CFS scheduler. I could be wrong, though.
 
 > Q: Why doesn't this kernel include the PREEMPT_RT patches?
 
