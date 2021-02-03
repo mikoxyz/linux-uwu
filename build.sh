@@ -22,7 +22,7 @@ Do you want to install the build dependencies? [y/n] "
 while true; do
 	read input
 	if [ "$input" = "y" ]; then
-		printf "Installing the build dependencies..."
+		printf "Installing the build dependencies...\n"
 		sudo apt-get update && sudo apt-get install build-essential -y &&\
 		sudo apt-get build-dep linux -y
 		break
@@ -33,23 +33,23 @@ while true; do
 	fi
 done
 
-echo "Cloning the configs repo..."
+printf "Cloning the configs repo...\n"
 git clone git@github.com:mikoxyz/linux-uwu-configs
 
 # Check if host CPU is Intel and use the Intel config if that's the case. 
 # Otherwise, use the normal config
 if lscpu | grep -q Intel; then
-	echo "Copying the Intel config to .config..."
+	printf "Copying the Intel config to .config...\n"
 	cp linux-uwu-configs/config-${KVER}-uwu-intel .config
 elif :; then
-	echo "Copying the normal config to .config..."
+	printf "Copying the normal config to .config...\n"
 	cp linux-uwu-configs/config-${KVER}-uwu .config
 fi
 
-echo "Starting the build..."
+printf "Starting the build..."
 make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-${PKGVER}
 unset KVER
 unset PKGVER
-echo "Done!"
+printf "Done!\n"
 
 exit 0
