@@ -50,7 +50,7 @@ elif :; then
 fi
 
 printf "Starting the build...\n"
-make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-${PKGVER}
+make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
 unset KVER
 unset PKGVER
 printf "Done!\n"
