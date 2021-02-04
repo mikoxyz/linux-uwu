@@ -36,14 +36,17 @@ done
 printf "Cloning the configs repo...\n"
 git clone git@github.com:mikoxyz/linux-uwu-configs
 
-# Check if host CPU is Intel and use the Intel config if that's the case. 
-# Otherwise, use the normal config
-if lscpu | grep -q Intel; then
+# Check the host CPU and use the most appropriate config
+# TODO: Check znver
+if lscpu | grep -q Ryzen; then
+	printf "Copying the Ryzen config to .config...\n"
+	cp linux-uwu-configs/config-${KVER}-uwu-znver1 .config
+elif lscpu | grep -q Intel; then
 	printf "Copying the Intel config to .config...\n"
 	cp linux-uwu-configs/config-${KVER}-uwu-intel .config
 elif :; then
-	printf "Copying the normal config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu .config
+	printf "Copying the generic config to .config...\n"
+	cp linux-uwu-configs/config-${KVER}-uwu-generic .config
 fi
 
 printf "Starting the build...\n"
