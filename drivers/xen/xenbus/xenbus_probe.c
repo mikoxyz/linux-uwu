@@ -731,6 +731,23 @@ static int xenbus_probe_thread(void *unused)
 	return 0;
 }
 
+static int xenbus_probe_thread(void *unused)
+{
+	DEFINE_WAIT(w);
+
+	/*
+	 * We actually just want to wait for *any* trigger of xb_waitq,
+	 * and run xenbus_probe() the moment it occurs.
+	 */
+	prepare_to_wait(&xb_waitq, &w, TASK_INTERRUPTIBLE);
+	schedule();
+	finish_wait(&xb_waitq, &w);
+
+	DPRINTK("probing");
+	xenbus_probe();
+	return 0;
+}
+
 static int __init xenbus_probe_initcall(void)
 {
 	/*
@@ -812,6 +829,20 @@ static int __init xenstored_local_init(void)
 	BUG_ON(err);
 	xen_store_evtchn = alloc_unbound.port;
 
+	/*
+	 * For XS_LOCAL, spawn a thread which will wait for xenstored
+	 * or a xenstore-stubdom to be started, then probe. It will be
+	 * triggered when communication starts happening, by waiting
+	 * on xb_waitq.
+	 */
+	if (xen_store_domain_type == XS_LOCAL) {
+		struct task_struct *probe_task;
+
+		probe_task = kthread_run(xenbus_probe_thread, NULL,
+					 "xenbus_probe");
+		if (IS_ERR(probe_task))
+			return PTR_ERR(probe_task);
+	}
 	return 0;
 
  out_err:
