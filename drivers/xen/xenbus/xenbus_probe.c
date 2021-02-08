@@ -812,20 +812,6 @@ static int __init xenstored_local_init(void)
 	BUG_ON(err);
 	xen_store_evtchn = alloc_unbound.port;
 
-	/*
-	 * For XS_LOCAL, spawn a thread which will wait for xenstored
-	 * or a xenstore-stubdom to be started, then probe. It will be
-	 * triggered when communication starts happening, by waiting
-	 * on xb_waitq.
-	 */
-	if (xen_store_domain_type == XS_LOCAL) {
-		struct task_struct *probe_task;
-
-		probe_task = kthread_run(xenbus_probe_thread, NULL,
-					 "xenbus_probe");
-		if (IS_ERR(probe_task))
-			return PTR_ERR(probe_task);
-	}
 	return 0;
 
  out_err:
