@@ -1,6 +1,6 @@
 #!/bin/sh
 
-KVER=5.10.17
+KVER=5.10.18
 PKGVER=1
 
 # Check if git is installed
@@ -23,8 +23,8 @@ while true; do
 	read input
 	if [ "$input" = "y" ]; then
 		printf "Installing the build dependencies...\n"
-		sudo apt-get update && sudo apt-get install build-essential -y &&\
-		sudo apt-get build-dep linux -y
+		sudo apt-get update; sudo apt-get install build-essential llvm lld\
+		clang -y; sudo apt-get build-dep linux -y
 		break
 	elif [ "$input" = "n" ]; then
 		break
@@ -50,7 +50,7 @@ elif :; then
 fi
 
 printf "Starting the build...\n"
-make -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
+make CC=clang LLVM=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
 unset KVER
 unset PKGVER
 printf "Done!\n"
