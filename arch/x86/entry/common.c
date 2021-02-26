@@ -45,8 +45,7 @@ __visible noinstr void do_syscall_64(unsigned long nr, struct pt_regs *regs)
 		nr = array_index_nospec(nr, NR_syscalls);
 		regs->ax = sys_call_table[nr](regs);
 #ifdef CONFIG_X86_X32_ABI
-	} else if (x32_enabled &&
-		   likely((nr & __X32_SYSCALL_BIT) &&
+	} else if (likely((nr & __X32_SYSCALL_BIT) &&
 			  (nr & ~__X32_SYSCALL_BIT) < X32_NR_syscalls)) {
 		nr = array_index_nospec(nr & ~__X32_SYSCALL_BIT,
 					X32_NR_syscalls);
@@ -212,40 +211,6 @@ __visible noinstr long do_SYSENTER_32(struct pt_regs *regs)
 SYSCALL_DEFINE0(ni_syscall)
 {
 	return -ENOSYS;
-}
-
-noinstr bool idtentry_enter_nmi(struct pt_regs *regs)
-{
-	bool irq_state = lockdep_hardirqs_enabled();
-
-	__nmi_enter();
-	lockdep_hardirqs_off(CALLER_ADDR0);
-	lockdep_hardirq_enter();
-	rcu_nmi_enter();
-
-	instrumentation_begin();
-	trace_hardirqs_off_finish();
-	ftrace_nmi_enter();
-	instrumentation_end();
-
-	return irq_state;
-}
-
-noinstr void idtentry_exit_nmi(struct pt_regs *regs, bool restore)
-{
-	instrumentation_begin();
-	ftrace_nmi_exit();
-	if (restore) {
-		trace_hardirqs_on_prepare();
-		lockdep_hardirqs_on_prepare(CALLER_ADDR0);
-	}
-	instrumentation_end();
-
-	rcu_nmi_exit();
-	lockdep_hardirq_exit();
-	if (restore)
-		lockdep_hardirqs_on(CALLER_ADDR0);
-	__nmi_exit();
 }
 
 #ifdef CONFIG_XEN_PV

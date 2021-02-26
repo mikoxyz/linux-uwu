@@ -1250,7 +1250,8 @@ static void vpeirq(struct tasklet_struct *t)
 		return;
 
 	/* Ensure streamed PCI data is synced to CPU */
-	pci_dma_sync_sg_for_cpu(budget->dev->pci, budget->pt.slist, budget->pt.nents, PCI_DMA_FROMDEVICE);
+	dma_sync_sg_for_cpu(&budget->dev->pci->dev, budget->pt.slist,
+			    budget->pt.nents, DMA_FROM_DEVICE);
 
 #if 0
 	/* track rps1 activity */
@@ -1501,8 +1502,13 @@ static int get_firmware(struct av7110* av7110)
 	/* request the av7110 firmware, this will block until someone uploads it */
 	ret = request_firmware(&fw, "dvb-ttpci-01.fw", &av7110->dev->pci->dev);
 	if (ret) {
-		if (ret == -ENOENT)
-			printk(KERN_ERR "dvb-ttpci: firmware can be downloaded from https://linuxtv.org/download/dvb/firmware/\n");
+		if (ret == -ENOENT) {
+			printk(KERN_ERR "dvb-ttpci: could not load firmware, file not found: dvb-ttpci-01.fw\n");
+			printk(KERN_ERR "dvb-ttpci: usually this should be in /usr/lib/hotplug/firmware or /lib/firmware\n");
+			printk(KERN_ERR "dvb-ttpci: and can be downloaded from https://linuxtv.org/download/dvb/firmware/\n");
+		} else
+			printk(KERN_ERR "dvb-ttpci: cannot request firmware (error %i)\n",
+			       ret);
 		return -EINVAL;
 	}
 
@@ -2632,7 +2638,8 @@ static int av7110_attach(struct saa7146_dev* dev,
 	av7110->arm_thread = NULL;
 
 	/* allocate and init buffers */
-	av7110->debi_virt = pci_alloc_consistent(pdev, 8192, &av7110->debi_bus);
+	av7110->debi_virt = dma_alloc_coherent(&pdev->dev, 8192,
+					       &av7110->debi_bus, GFP_KERNEL);
 	if (!av7110->debi_virt)
 		goto err_saa71466_vfree_4;
 
@@ -2721,7 +2728,8 @@ err_av7110_av_exit_7:
 err_iobuf_vfree_6:
 	vfree(av7110->iobuf);
 err_pci_free_5:
-	pci_free_consistent(pdev, 8192, av7110->debi_virt, av7110->debi_bus);
+	dma_free_coherent(&pdev->dev, 8192, av7110->debi_virt,
+			  av7110->debi_bus);
 err_saa71466_vfree_4:
 	if (av7110->grabbing)
 		saa7146_vfree_destroy_pgtable(pdev, av7110->grabbing, &av7110->pt);
@@ -2774,8 +2782,8 @@ static int av7110_detach(struct saa7146_dev* saa)
 	av7110_av_exit(av7110);
 
 	vfree(av7110->iobuf);
-	pci_free_consistent(saa->pci, 8192, av7110->debi_virt,
-			    av7110->debi_bus);
+	dma_free_coherent(&saa->pci->dev, 8192, av7110->debi_virt,
+			  av7110->debi_bus);
 
 	i2c_del_adapter(&av7110->i2c_adap);
 

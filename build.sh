@@ -1,6 +1,6 @@
 #!/bin/sh
 
-KVER=5.10.18
+KVER=5.11.0
 PKGVER=1
 
 # Check if git is installed
@@ -50,7 +50,7 @@ elif :; then
 fi
 
 printf "Starting the build...\n"
-make CC=clang LLVM=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
+make CC=clang LLVM=1 LLVM_IAS=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
 unset KVER
 unset PKGVER
 printf "Done!\n"

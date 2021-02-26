@@ -891,8 +891,10 @@ static int load_firmware(struct drxd_state *state, const char *fw_name)
 {
 	const struct firmware *fw;
 
-	if (request_firmware(&fw, fw_name, state->dev))
+	if (request_firmware(&fw, fw_name, state->dev) < 0) {
+		printk(KERN_ERR "drxd: firmware load failure [%s]\n", fw_name);
 		return -EIO;
+	}
 
 	state->microcode = kmemdup(fw->data, fw->size, GFP_KERNEL);
 	if (!state->microcode) {
@@ -1620,7 +1622,6 @@ static int CorrectSysClockDeviation(struct drxd_state *state)
 			break;
 		default:
 			return -1;
-			break;
 		}
 
 		/* Compute new sysclock value

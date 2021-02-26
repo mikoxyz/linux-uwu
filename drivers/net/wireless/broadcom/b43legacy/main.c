@@ -1524,8 +1524,11 @@ static int do_request_fw(struct b43legacy_wldev *dev,
 	} else {
 		err = request_firmware(fw, path, dev->dev->dev);
 	}
-	if (err)
+	if (err) {
+		b43legacyerr(dev->wl, "Firmware file \"%s\" not found "
+		       "or load failed.\n", path);
 		return err;
+	}
 	if ((*fw)->size < sizeof(struct b43legacy_fw_header))
 		goto err_format;
 	hdr = (struct b43legacy_fw_header *)((*fw)->data);
@@ -3378,11 +3381,10 @@ static int b43legacy_op_add_interface(struct ieee80211_hw *hw,
 	unsigned long flags;
 	int err = -EOPNOTSUPP;
 
-	/* TODO: allow WDS/AP devices to coexist */
+	/* TODO: allow AP devices to coexist */
 
 	if (vif->type != NL80211_IFTYPE_AP &&
 	    vif->type != NL80211_IFTYPE_STATION &&
-	    vif->type != NL80211_IFTYPE_WDS &&
 	    vif->type != NL80211_IFTYPE_ADHOC)
 		return -EOPNOTSUPP;
 
@@ -3802,9 +3804,6 @@ static int b43legacy_wireless_init(struct ssb_device *dev)
 	hw->wiphy->interface_modes =
 		BIT(NL80211_IFTYPE_AP) |
 		BIT(NL80211_IFTYPE_STATION) |
-#ifdef CONFIG_WIRELESS_WDS
-		BIT(NL80211_IFTYPE_WDS) |
-#endif
 		BIT(NL80211_IFTYPE_ADHOC);
 	hw->queues = 1; /* FIXME: hardware has more queues */
 	hw->max_rates = 2;

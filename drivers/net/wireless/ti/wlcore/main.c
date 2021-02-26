@@ -764,8 +764,10 @@ static int wl12xx_fetch_firmware(struct wl1271 *wl, bool plt)
 
 	ret = request_firmware(&fw, fw_name, wl->dev);
 
-	if (ret)
+	if (ret < 0) {
+		wl1271_error("could not get firmware %s: %d", fw_name, ret);
 		return ret;
+	}
 
 	if (fw->size % 4) {
 		wl1271_error("firmware size is not multiple of 32 bits: %zu",
@@ -2225,7 +2227,7 @@ static int wl12xx_init_vif_data(struct wl1271 *wl, struct ieee80211_vif *vif)
 	switch (ieee80211_vif_type_p2p(vif)) {
 	case NL80211_IFTYPE_P2P_CLIENT:
 		wlvif->p2p = 1;
-		/* fall-through */
+		fallthrough;
 	case NL80211_IFTYPE_STATION:
 	case NL80211_IFTYPE_P2P_DEVICE:
 		wlvif->bss_type = BSS_TYPE_STA_BSS;
@@ -2235,7 +2237,7 @@ static int wl12xx_init_vif_data(struct wl1271 *wl, struct ieee80211_vif *vif)
 		break;
 	case NL80211_IFTYPE_P2P_GO:
 		wlvif->p2p = 1;
-		/* fall-through */
+		fallthrough;
 	case NL80211_IFTYPE_AP:
 	case NL80211_IFTYPE_MESH_POINT:
 		wlvif->bss_type = BSS_TYPE_AP_BSS;

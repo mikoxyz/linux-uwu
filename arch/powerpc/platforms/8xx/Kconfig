@@ -135,19 +135,16 @@ config NO_UCODE_PATCH
 
 config USB_SOF_UCODE_PATCH
 	bool "USB SOF patch"
-	depends on BROKEN
 	help
 	  Help not implemented yet, coming soon.
 
 config I2C_SPI_UCODE_PATCH
 	bool "I2C/SPI relocation patch"
-	depends on BROKEN
 	help
 	  Help not implemented yet, coming soon.
 
 config I2C_SPI_SMC1_UCODE_PATCH
 	bool "I2C/SPI/SMC1 relocation patch"
-	depends on BROKEN
 	help
 	  Help not implemented yet, coming soon.
 
@@ -196,13 +193,6 @@ config PIN_TLB_IMMR
 	  This pins the IMMR area with a 512kbytes page. In case
 	  CONFIG_PIN_TLB_DATA is also selected, it will reduce
 	  CONFIG_PIN_TLB_DATA to 24 Mbytes.
-
-config PIN_TLB_TEXT
-	bool "Pinned TLB for TEXT"
-	depends on PIN_TLB
-	default y
-	help
-	  This pins kernel text with 8M pages.
 
 endmenu
 

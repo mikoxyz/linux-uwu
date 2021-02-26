@@ -144,12 +144,7 @@ static void cpu_set_fpu_2008(struct cpuinfo_mips *c)
  * IEEE 754 conformance mode to use.  Affects the NaN encoding and the
  * ABS.fmt/NEG.fmt execution mode.
  */
-enum ieee754_mode { STRICT, LEGACY, STD2008, RELAXED };
-#ifdef CONFIG_CPU_LOONGSON64
-static enum ieee754_mode ieee754 = RELAXED;
-#else
-static enum ieee754_mode ieee754 = STRICT;
-#endif
+static enum { STRICT, LEGACY, STD2008, RELAXED } ieee754 = STRICT;
 
 /*
  * Set the IEEE 754 NaN encodings and the ABS.fmt/NEG.fmt execution modes

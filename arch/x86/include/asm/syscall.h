@@ -13,7 +13,6 @@
 #include <uapi/linux/audit.h>
 #include <linux/sched.h>
 #include <linux/err.h>
-#include <linux/jump_label.h>
 #include <asm/thread_info.h>	/* for TS_COMPAT */
 #include <asm/unistd.h>
 
@@ -30,18 +29,6 @@ extern const sys_call_ptr_t ia32_sys_call_table[];
 
 #ifdef CONFIG_X86_X32_ABI
 extern const sys_call_ptr_t x32_sys_call_table[];
-#endif
-
-#if defined(CONFIG_X86_X32_ABI)
-#if defined(CONFIG_X86_X32_DISABLED)
-DECLARE_STATIC_KEY_FALSE(x32_enabled_skey);
-#define x32_enabled static_branch_unlikely(&x32_enabled_skey)
-#else
-DECLARE_STATIC_KEY_TRUE(x32_enabled_skey);
-#define x32_enabled static_branch_likely(&x32_enabled_skey)
-#endif
-#else
-#define x32_enabled 0
 #endif
 
 /*

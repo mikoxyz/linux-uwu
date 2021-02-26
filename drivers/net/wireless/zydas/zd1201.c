@@ -62,6 +62,8 @@ static int zd1201_fw_upload(struct usb_device *dev, int apfw)
 
 	err = request_firmware(&fw_entry, fwfile, &dev->dev);
 	if (err) {
+		dev_err(&dev->dev, "Failed to load %s firmware file!\n", fwfile);
+		dev_err(&dev->dev, "Make sure the hotplug firmware loader is installed.\n");
 		dev_err(&dev->dev, "Goto http://linux-lc100020.sourceforge.net for more info.\n");
 		return err;
 	}
@@ -964,7 +966,7 @@ static int zd1201_set_mode(struct net_device *dev,
 			 */
 			zd1201_join(zd, "\0-*#\0", 5);
 			/* Put port in pIBSS */
-			/* Fall through */
+			fallthrough;
 		case 8: /* No pseudo-IBSS in wireless extensions (yet) */
 			porttype = ZD1201_PORTTYPE_PSEUDOIBSS;
 			break;

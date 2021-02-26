@@ -2876,15 +2876,15 @@ static int asc_get_eeprom_string(ushort *serialnum, uchar *cp)
 static void asc_prt_asc_board_eeprom(struct seq_file *m, struct Scsi_Host *shost)
 {
 	struct asc_board *boardp = shost_priv(shost);
-	ASC_DVC_VAR *asc_dvc_varp;
 	ASCEEP_CONFIG *ep;
 	int i;
-#ifdef CONFIG_ISA
-	int isa_dma_speed[] = { 10, 8, 7, 6, 5, 4, 3, 2 };
-#endif /* CONFIG_ISA */
 	uchar serialstr[13];
+#ifdef CONFIG_ISA
+	ASC_DVC_VAR *asc_dvc_varp;
+	int isa_dma_speed[] = { 10, 8, 7, 6, 5, 4, 3, 2 };
 
 	asc_dvc_varp = &boardp->dvc_var.asc_dvc_var;
+#endif /* CONFIG_ISA */
 	ep = &boardp->eep_config.asc_eep;
 
 	seq_printf(m,
@@ -3171,7 +3171,6 @@ static void asc_prt_adv_board_eeprom(struct seq_file *m, struct Scsi_Host *shost
 static void asc_prt_driver_conf(struct seq_file *m, struct Scsi_Host *shost)
 {
 	struct asc_board *boardp = shost_priv(shost);
-	int chip_scsi_id;
 
 	seq_printf(m,
 		"\nLinux Driver Configuration and Information for AdvanSys SCSI Host %d:\n",
@@ -3197,12 +3196,6 @@ static void asc_prt_driver_conf(struct seq_file *m, struct Scsi_Host *shost)
 		   boardp->asc_n_io_port);
 
 	seq_printf(m, " io_port 0x%lx\n", shost->io_port);
-
-	if (ASC_NARROW_BOARD(boardp)) {
-		chip_scsi_id = boardp->dvc_cfg.asc_dvc_cfg.chip_scsi_id;
-	} else {
-		chip_scsi_id = boardp->dvc_var.adv_dvc_var.chip_scsi_id;
-	}
 }
 
 /*
@@ -4103,6 +4096,8 @@ static int AscInitAsc1000Driver(ASC_DVC_VAR *asc_dvc)
 
 	err = request_firmware(&fw, fwname, asc_dvc->drv_ptr->dev);
 	if (err) {
+		printk(KERN_ERR "Failed to load image \"%s\" err %d\n",
+		       fwname, err);
 		asc_dvc->err_code |= ASC_IERR_MCODE_CHKSUM;
 		return err;
 	}
@@ -4467,6 +4462,8 @@ static int AdvInitAsc3550Driver(ADV_DVC_VAR *asc_dvc)
 
 	err = request_firmware(&fw, fwname, asc_dvc->drv_ptr->dev);
 	if (err) {
+		printk(KERN_ERR "Failed to load image \"%s\" err %d\n",
+		       fwname, err);
 		asc_dvc->err_code = ASC_IERR_MCODE_CHKSUM;
 		return err;
 	}
@@ -4965,6 +4962,8 @@ static int AdvInitAsc38C0800Driver(ADV_DVC_VAR *asc_dvc)
 
 	err = request_firmware(&fw, fwname, asc_dvc->drv_ptr->dev);
 	if (err) {
+		printk(KERN_ERR "Failed to load image \"%s\" err %d\n",
+		       fwname, err);
 		asc_dvc->err_code = ASC_IERR_MCODE_CHKSUM;
 		return err;
 	}
@@ -5451,6 +5450,8 @@ static int AdvInitAsc38C1600Driver(ADV_DVC_VAR *asc_dvc)
 
 	err = request_firmware(&fw, fwname, asc_dvc->drv_ptr->dev);
 	if (err) {
+		printk(KERN_ERR "Failed to load image \"%s\" err %d\n",
+		       fwname, err);
 		asc_dvc->err_code = ASC_IERR_MCODE_CHKSUM;
 		return err;
 	}
@@ -6103,7 +6104,6 @@ static int AdvISR(ADV_DVC_VAR *asc_dvc)
 {
 	AdvPortAddr iop_base;
 	uchar int_stat;
-	ushort target_bit;
 	ADV_CARR_T *free_carrp;
 	__le32 irq_next_vpa;
 	ADV_SCSI_REQ_Q *scsiq;
@@ -6189,8 +6189,6 @@ static int AdvISR(ADV_DVC_VAR *asc_dvc)
 		free_carrp->next_vpa = asc_dvc->carr_freelist->carr_va;
 		asc_dvc->carr_freelist = free_carrp;
 		asc_dvc->carr_pending_cnt--;
-
-		target_bit = ADV_TID_TO_TIDMASK(scsiq->target_id);
 
 		/*
 		 * Clear request microcode control flag.

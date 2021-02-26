@@ -665,8 +665,7 @@ extern void efi_mem_reserve(phys_addr_t addr, u64 size);
 extern int efi_mem_reserve_persistent(phys_addr_t addr, u64 size);
 extern void efi_initialize_iomem_resources(struct resource *code_resource,
 		struct resource *data_resource, struct resource *bss_resource);
-extern u64 efi_get_fdt_params(struct efi_memory_map_data *data,
-			      u32 *secure_boot);
+extern u64 efi_get_fdt_params(struct efi_memory_map_data *data);
 extern struct kobject *efi_kobj;
 
 extern int efi_reboot_quirk_mode;
@@ -787,14 +786,6 @@ extern int __init efi_setup_pcdp_console(char *);
 #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
 #define EFI_MEM_NO_SOFT_RESERVE	11	/* Is the kernel configured to ignore soft reservations? */
 #define EFI_PRESERVE_BS_REGIONS	12	/* Are EFI boot-services memory segments available? */
-#define EFI_SECURE_BOOT		13	/* Are we in Secure Boot mode? */
-
-enum efi_secureboot_mode {
-	efi_secureboot_mode_unset,
-	efi_secureboot_mode_unknown,
-	efi_secureboot_mode_disabled,
-	efi_secureboot_mode_enabled,
-};
 
 #ifdef CONFIG_EFI
 /*
@@ -818,7 +809,6 @@ static inline bool efi_rt_services_supported(unsigned int mask)
 {
 	return (efi.runtime_supported_mask & mask) == mask;
 }
-extern void __init efi_set_secure_boot(enum efi_secureboot_mode mode);
 #else
 static inline bool efi_enabled(int feature)
 {
@@ -826,12 +816,6 @@ static inline bool efi_enabled(int feature)
 }
 static inline void
 efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
-
-static inline bool
-efi_capsule_pending(int *reset_type)
-{
-	return false;
-}
 
 static inline bool efi_soft_reserve_enabled(void)
 {
@@ -842,7 +826,6 @@ static inline bool efi_rt_services_supported(unsigned int mask)
 {
 	return false;
 }
-static inline void efi_set_secure_boot(enum efi_secureboot_mode mode) {}
 #endif
 
 extern int efi_status_to_err(efi_status_t status);
@@ -1049,6 +1032,7 @@ bool efivar_validate(efi_guid_t vendor, efi_char16_t *var_name, u8 *data,
 bool efivar_variable_is_removable(efi_guid_t vendor, const char *name,
 				  size_t len);
 
+#if IS_ENABLED(CONFIG_EFI_CAPSULE_LOADER)
 extern bool efi_capsule_pending(int *reset_type);
 
 extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
@@ -1056,6 +1040,9 @@ extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
 
 extern int efi_capsule_update(efi_capsule_header_t *capsule,
 			      phys_addr_t *pages);
+#else
+static inline bool efi_capsule_pending(int *reset_type) { return false; }
+#endif
 
 #ifdef CONFIG_EFI_RUNTIME_MAP
 int efi_runtime_map_init(struct kobject *);
@@ -1094,7 +1081,34 @@ static inline bool efi_runtime_disabled(void) { return true; }
 extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
 extern unsigned long efi_call_virt_save_flags(void);
 
-enum efi_secureboot_mode efi_get_secureboot(void);
+enum efi_secureboot_mode {
+	efi_secureboot_mode_unset,
+	efi_secureboot_mode_unknown,
+	efi_secureboot_mode_disabled,
+	efi_secureboot_mode_enabled,
+};
+
+static inline
+enum efi_secureboot_mode efi_get_secureboot_mode(efi_get_variable_t *get_var)
+{
+	u8 secboot, setupmode = 0;
+	efi_status_t status;
+	unsigned long size;
+
+	size = sizeof(secboot);
+	status = get_var(L"SecureBoot", &EFI_GLOBAL_VARIABLE_GUID, NULL, &size,
+			 &secboot);
+	if (status == EFI_NOT_FOUND)
+		return efi_secureboot_mode_disabled;
+	if (status != EFI_SUCCESS)
+		return efi_secureboot_mode_unknown;
+
+	size = sizeof(setupmode);
+	get_var(L"SetupMode", &EFI_GLOBAL_VARIABLE_GUID, NULL, &size, &setupmode);
+	if (secboot == 0 || setupmode == 1)
+		return efi_secureboot_mode_disabled;
+	return efi_secureboot_mode_enabled;
+}
 
 #ifdef CONFIG_RESET_ATTACK_MITIGATION
 void efi_enable_reset_attack_mitigation(void);

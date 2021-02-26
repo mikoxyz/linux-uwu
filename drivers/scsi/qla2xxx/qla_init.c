@@ -5007,6 +5007,9 @@ qla2x00_alloc_fcport(scsi_qla_host_t *vha, gfp_t flags)
 	INIT_LIST_HEAD(&fcport->gnl_entry);
 	INIT_LIST_HEAD(&fcport->list);
 
+	INIT_LIST_HEAD(&fcport->sess_cmd_list);
+	spin_lock_init(&fcport->sess_cmd_lock);
+
 	return fcport;
 }
 
@@ -5979,6 +5982,9 @@ qla2x00_find_all_fabric_devs(scsi_qla_host_t *vha)
 				break;
 			}
 
+			if (fcport->login_retry == 0)
+				fcport->login_retry =
+					vha->hw->login_retry_count;
 			/*
 			 * If device was not a fabric device before.
 			 */
@@ -7935,6 +7941,10 @@ qla2x00_load_risc(scsi_qla_host_t *vha, uint32_t *srisc_addr)
 	/* Load firmware blob. */
 	blob = qla2x00_request_firmware(vha);
 	if (!blob) {
+		ql_log(ql_log_info, vha, 0x0083,
+		    "Firmware image unavailable.\n");
+		ql_log(ql_log_info, vha, 0x0084,
+		    "Firmware images can be retrieved from: "QLA_FW_URL ".\n");
 		return QLA_FUNCTION_FAILED;
 	}
 
@@ -8037,6 +8047,9 @@ qla24xx_load_risc_blob(scsi_qla_host_t *vha, uint32_t *srisc_addr)
 
 	blob = qla2x00_request_firmware(vha);
 	if (!blob) {
+		ql_log(ql_log_warn, vha, 0x0092,
+		    "-> Firmware file not found.\n");
+
 		return QLA_FUNCTION_FAILED;
 	}
 

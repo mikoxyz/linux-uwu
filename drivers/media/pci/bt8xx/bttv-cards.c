@@ -3904,8 +3904,10 @@ static int pvr_boot(struct bttv *btv)
 	int rc;
 
 	rc = request_firmware(&fw_entry, "hcwamc.rbf", &btv->c.pci->dev);
-	if (rc != 0)
+	if (rc != 0) {
+		pr_warn("%d: no altera firmware [via hotplug]\n", btv->c.nr);
 		return rc;
+	}
 	rc = pvr_altera_load(btv, fw_entry->data, fw_entry->size);
 	pr_info("%d: altera firmware upload %s\n",
 		btv->c.nr, (rc < 0) ? "failed" : "ok");
@@ -3932,8 +3934,10 @@ static void osprey_eeprom(struct bttv *btv, const u8 ee[256])
 			if (checksum != ee[21])
 				return;
 			cardid = BTTV_BOARD_OSPREY1x0_848;
-			for (i = 12; i < 21; i++)
-				serial *= 10, serial += ee[i] - '0';
+			for (i = 12; i < 21; i++) {
+				serial *= 10;
+				serial += ee[i] - '0';
+			}
 		}
 	} else {
 		unsigned short type;

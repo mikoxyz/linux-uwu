@@ -226,8 +226,11 @@ int softing_load_app_fw(const char *file, struct softing *card)
 	int8_t type_end = 0, type_entrypoint = 0;
 
 	ret = request_firmware(&fw, file, &card->pdev->dev);
-	if (ret)
+	if (ret) {
+		dev_alert(&card->pdev->dev, "request_firmware(%s) got %i\n",
+			file, ret);
 		return ret;
+	}
 	dev_dbg(&card->pdev->dev, "firmware(%s) got %lu bytes\n",
 		file, (unsigned long)fw->size);
 	/* parse the firmware */
@@ -621,7 +624,7 @@ int softing_startstop(struct net_device *dev, int up)
 	 */
 	memset(&msg, 0, sizeof(msg));
 	msg.can_id = CAN_ERR_FLAG | CAN_ERR_RESTARTED;
-	msg.can_dlc = CAN_ERR_DLC;
+	msg.len = CAN_ERR_DLC;
 	for (j = 0; j < ARRAY_SIZE(card->net); ++j) {
 		if (!(bus_bitmask_start & (1 << j)))
 			continue;

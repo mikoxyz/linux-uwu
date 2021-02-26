@@ -527,8 +527,11 @@ static int _mwifiex_fw_dpc(const struct firmware *firmware, void *context)
 	struct wireless_dev *wdev;
 	struct completion *fw_done = adapter->fw_done;
 
-	if (!firmware)
+	if (!firmware) {
+		mwifiex_dbg(adapter, ERROR,
+			    "Failed to get firmware %s\n", adapter->fw_name);
 		goto err_dnld_fw;
+	}
 
 	memset(&fw, 0, sizeof(struct mwifiex_fw_image));
 	adapter->firmware = firmware;
@@ -1452,7 +1455,7 @@ static void mwifiex_uninit_sw(struct mwifiex_adapter *adapter)
 }
 
 /*
- * This function gets called during PCIe function level reset.
+ * This function can be used for shutting down the adapter SW.
  */
 int mwifiex_shutdown_sw(struct mwifiex_adapter *adapter)
 {
@@ -1480,7 +1483,7 @@ int mwifiex_shutdown_sw(struct mwifiex_adapter *adapter)
 }
 EXPORT_SYMBOL_GPL(mwifiex_shutdown_sw);
 
-/* This function gets called during PCIe function level reset. Required
+/* This function can be used for reinitting the adapter SW. Required
  * code is extracted from mwifiex_add_card()
  */
 int

@@ -1028,6 +1028,8 @@ struct perf_sample_data {
 
 	u64				phys_addr;
 	u64				cgroup;
+	u64				data_page_size;
+	u64				code_page_size;
 } ____cacheline_aligned;
 
 /* default value for data source */
@@ -1298,11 +1300,6 @@ int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
 		void *buffer, size_t *lenp, loff_t *ppos);
 int perf_event_max_stack_handler(struct ctl_table *table, int write,
 		void *buffer, size_t *lenp, loff_t *ppos);
-
-static inline bool perf_paranoid_any(void)
-{
-	return sysctl_perf_event_paranoid > 2;
-}
 
 /* Access to perf_event_open(2) syscall. */
 #define PERF_SECURITY_OPEN		0
@@ -1589,5 +1586,9 @@ int perf_event_exit_cpu(unsigned int cpu);
 extern void __weak arch_perf_update_userpage(struct perf_event *event,
 					     struct perf_event_mmap_page *userpg,
 					     u64 now);
+
+#ifdef CONFIG_MMU
+extern __weak u64 arch_perf_get_page_size(struct mm_struct *mm, unsigned long addr);
+#endif
 
 #endif /* _LINUX_PERF_EVENT_H */

@@ -24,7 +24,6 @@
 #include <linux/bitops.h>
 #include <linux/mutex.h>
 #include <linux/shmem_fs.h>
-#include <linux/module.h>
 #include "ashmem.h"
 
 #define ASHMEM_NAME_PREFIX "dev/ashmem/"
@@ -451,9 +450,9 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 		vma_set_anonymous(vma);
 	}
 
-	if (vma->vm_file)
-		fput(vma->vm_file);
-	vma->vm_file = asma->file;
+	vma_set_file(vma, asma->file);
+	/* XXX: merge this with the get_file() above if possible */
+	fput(asma->file);
 
 out:
 	mutex_unlock(&ashmem_mutex);
@@ -966,5 +965,3 @@ out:
 	return ret;
 }
 device_initcall(ashmem_init);
-
-MODULE_LICENSE("GPL v2");

@@ -109,8 +109,11 @@ static int vnt_download_firmware(struct vnt_private *priv)
 	dev_dbg(dev, "---->Download firmware\n");
 
 	ret = request_firmware(&fw, FIRMWARE_NAME, dev);
-	if (ret)
+	if (ret) {
+		dev_err(dev, "firmware file %s request failed (%d)\n",
+			FIRMWARE_NAME, ret);
 		goto end;
+	}
 
 	for (ii = 0; ii < fw->size; ii += FIRMWARE_CHUNK_SIZE) {
 		length = min_t(int, fw->size - ii, FIRMWARE_CHUNK_SIZE);
@@ -911,6 +914,7 @@ static int vnt_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 
 			vnt_mac_disable_keyentry(priv, key->hw_key_idx);
 		}
+		break;
 
 	default:
 		break;

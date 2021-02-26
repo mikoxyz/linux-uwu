@@ -535,15 +535,18 @@ fw_get_filesystem_firmware(struct device *device, struct fw_priv *fw_priv,
 						       file_size_ptr,
 						       READING_FIRMWARE);
 		if (rc < 0) {
-			dev_dbg(device, "loading %s failed with error %d\n",
-				path, rc);
+			if (rc != -ENOENT)
+				dev_warn(device, "loading %s failed with error %d\n",
+					 path, rc);
+			else
+				dev_dbg(device, "loading %s failed for no such file or directory.\n",
+					 path);
 			continue;
 		}
 		size = rc;
 		rc = 0;
 
-		dev_info(device, "firmware: direct-loading firmware %s\n",
-			 fw_priv->fw_name);
+		dev_dbg(device, "Loading firmware from %s\n", path);
 		if (decompress) {
 			dev_dbg(device, "f/w decompressing %s\n",
 				fw_priv->fw_name);
@@ -556,6 +559,8 @@ fw_get_filesystem_firmware(struct device *device, struct fw_priv *fw_priv,
 				continue;
 			}
 		} else {
+			dev_dbg(device, "direct-loading %s\n",
+				fw_priv->fw_name);
 			if (!fw_priv->data)
 				fw_priv->data = buffer;
 			fw_priv->size = size;
@@ -564,13 +569,6 @@ fw_get_filesystem_firmware(struct device *device, struct fw_priv *fw_priv,
 		break;
 	}
 	__putname(path);
-
-	if (rc) {
-		dev_err(device, "firmware: failed to load %s (%d)\n",
-			fw_priv->fw_name, rc);
-		if (rc == -ENOENT)
-			pr_err_once("See https://wiki.debian.org/Firmware for information about missing firmware\n");
-	}
 
 	return rc;
 }

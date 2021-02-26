@@ -2408,9 +2408,12 @@ static int stk9090m_frontend_attach(struct dvb_usb_adapter *adap)
 
 	dib9000_i2c_enumeration(&adap->dev->i2c_adap, 1, 0x10, 0x80);
 
-	if (request_firmware(&state->frontend_firmware, "dib9090.fw", &adap->dev->udev->dev))
+	if (request_firmware(&state->frontend_firmware, "dib9090.fw", &adap->dev->udev->dev)) {
+		deb_info("%s: Upload failed. (file not found?)\n", __func__);
 		return -ENODEV;
-	deb_info("%s: firmware read %zu bytes.\n", __func__, state->frontend_firmware->size);
+	} else {
+		deb_info("%s: firmware read %zu bytes.\n", __func__, state->frontend_firmware->size);
+	}
 	stk9090m_config.microcode_B_fe_size = state->frontend_firmware->size;
 	stk9090m_config.microcode_B_fe_buffer = state->frontend_firmware->data;
 
@@ -2475,9 +2478,12 @@ static int nim9090md_frontend_attach(struct dvb_usb_adapter *adap)
 	msleep(20);
 	dib0700_set_gpio(adap->dev, GPIO0, GPIO_OUT, 1);
 
-	if (request_firmware(&state->frontend_firmware, "dib9090.fw", &adap->dev->udev->dev))
+	if (request_firmware(&state->frontend_firmware, "dib9090.fw", &adap->dev->udev->dev)) {
+		deb_info("%s: Upload failed. (file not found?)\n", __func__);
 		return -EIO;
-	deb_info("%s: firmware read %zu bytes.\n", __func__, state->frontend_firmware->size);
+	} else {
+		deb_info("%s: firmware read %zu bytes.\n", __func__, state->frontend_firmware->size);
+	}
 	nim9090md_config[0].microcode_B_fe_size = state->frontend_firmware->size;
 	nim9090md_config[0].microcode_B_fe_buffer = state->frontend_firmware->data;
 	nim9090md_config[1].microcode_B_fe_size = state->frontend_firmware->size;
@@ -3068,8 +3074,8 @@ static int nim7090_tuner_attach(struct dvb_usb_adapter *adap)
 	struct dib0700_adapter_state *st = adap->priv;
 	struct i2c_adapter *tun_i2c = st->dib7000p_ops.get_i2c_tuner(adap->fe_adap[0].fe);
 
-	nim7090_dib0090_config.reset = st->dib7000p_ops.tuner_sleep,
-	nim7090_dib0090_config.sleep = st->dib7000p_ops.tuner_sleep,
+	nim7090_dib0090_config.reset = st->dib7000p_ops.tuner_sleep;
+	nim7090_dib0090_config.sleep = st->dib7000p_ops.tuner_sleep;
 	nim7090_dib0090_config.get_adc_power = st->dib7000p_ops.get_adc_power;
 
 	if (dvb_attach(dib0090_register, adap->fe_adap[0].fe, tun_i2c, &nim7090_dib0090_config) == NULL)

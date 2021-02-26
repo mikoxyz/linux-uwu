@@ -4102,8 +4102,10 @@ static ssize_t ipr_store_update_fw(struct device *dev,
 	if (endline)
 		*endline = '\0';
 
-	if (request_firmware(&fw_entry, fname, &ioa_cfg->pdev->dev))
+	if (request_firmware(&fw_entry, fname, &ioa_cfg->pdev->dev)) {
+		dev_err(&ioa_cfg->pdev->dev, "Firmware file %s not found\n", fname);
 		return -EIO;
+	}
 
 	image_hdr = (struct ipr_ucode_image_header *)fw_entry->data;
 
@@ -9485,7 +9487,6 @@ static pci_ers_result_t ipr_pci_error_detected(struct pci_dev *pdev,
 	case pci_channel_io_perm_failure:
 		ipr_pci_perm_failure(pdev);
 		return PCI_ERS_RESULT_DISCONNECT;
-		break;
 	default:
 		break;
 	}

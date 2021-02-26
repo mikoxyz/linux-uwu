@@ -464,7 +464,7 @@ static struct dst_entry* dccp_v4_route_skb(struct net *net, struct sock *sk,
 		.fl4_dport = dccp_hdr(skb)->dccph_sport,
 	};
 
-	security_skb_classify_flow(skb, flowi4_to_flowi(&fl4));
+	security_skb_classify_flow(skb, flowi4_to_flowi_common(&fl4));
 	rt = ip_route_output_flow(net, &fl4, sk);
 	if (IS_ERR(rt)) {
 		IP_INC_STATS(net, IPSTATS_MIB_OUTNOROUTES);
@@ -1071,8 +1071,8 @@ module_exit(dccp_v4_exit);
  * values directly, Also cover the case where the protocol is not specified,
  * i.e. net-pf-PF_INET-proto-0-type-SOCK_DCCP
  */
-/* MODULE_ALIAS_NET_PF_PROTO_TYPE(PF_INET, 33, 6); */
-/* MODULE_ALIAS_NET_PF_PROTO_TYPE(PF_INET, 0, 6); */
+MODULE_ALIAS_NET_PF_PROTO_TYPE(PF_INET, 33, 6);
+MODULE_ALIAS_NET_PF_PROTO_TYPE(PF_INET, 0, 6);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Arnaldo Carvalho de Melo <acme@mandriva.com>");
 MODULE_DESCRIPTION("DCCP - Datagram Congestion Controlled Protocol");

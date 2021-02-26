@@ -81,6 +81,7 @@ OBJCOPYFLAGS	:= -O binary -R .note -R .note.gnu.build-id -R .comment \
 
 # Give the various platforms the opportunity to set default image types
 defaultimage-y					:= zImage
+defaultimage-$(CONFIG_SH_SH7785LCR)		:= uImage
 defaultimage-$(CONFIG_SH_RSK)			:= uImage
 defaultimage-$(CONFIG_SH_URQUELL)		:= uImage
 defaultimage-$(CONFIG_SH_MIGOR)			:= uImage
@@ -102,16 +103,16 @@ UTS_MACHINE		:= sh
 LDFLAGS_vmlinux		+= -e _stext
 
 ifdef CONFIG_CPU_LITTLE_ENDIAN
-ld_bfd			:= elf32-sh-linux
-LDFLAGS_vmlinux		+= --defsym jiffies=jiffies_64 --oformat $(ld_bfd)
+ld-bfd			:= elf32-sh-linux
+LDFLAGS_vmlinux		+= --defsym jiffies=jiffies_64 --oformat $(ld-bfd)
 KBUILD_LDFLAGS		+= -EL
 else
-ld_bfd			:= elf32-shbig-linux
-LDFLAGS_vmlinux		+= --defsym jiffies=jiffies_64+4 --oformat $(ld_bfd)
+ld-bfd			:= elf32-shbig-linux
+LDFLAGS_vmlinux		+= --defsym jiffies=jiffies_64+4 --oformat $(ld-bfd)
 KBUILD_LDFLAGS		+= -EB
 endif
 
-export ld_bfd
+export ld-bfd
 
 head-y	:= arch/sh/kernel/head_32.o
 

@@ -210,10 +210,9 @@ void __init efi_init(void)
 {
 	struct efi_memory_map_data data;
 	u64 efi_system_table;
-	u32 secure_boot;
 
 	/* Grab UEFI information placed in FDT by stub */
-	efi_system_table = efi_get_fdt_params(&data, &secure_boot);
+	efi_system_table = efi_get_fdt_params(&data);
 	if (!efi_system_table)
 		return;
 
@@ -234,8 +233,6 @@ void __init efi_init(void)
 		efi_memmap_unmap();
 		return;
 	}
-
-	efi_set_secure_boot(secure_boot);
 
 	reserve_regions();
 	efi_esrt_init();
@@ -319,11 +316,9 @@ static struct device_node *find_pci_overlap_node(void)
  * resource reservation conflict on the memory window that the efifb
  * framebuffer steals from the PCIe host bridge.
  */
-static int efifb_add_links(const struct fwnode_handle *fwnode,
-			   struct device *dev)
+static int efifb_add_links(struct fwnode_handle *fwnode)
 {
 	struct device_node *sup_np;
-	struct device *sup_dev;
 
 	sup_np = find_pci_overlap_node();
 
@@ -334,26 +329,8 @@ static int efifb_add_links(const struct fwnode_handle *fwnode,
 	if (!sup_np)
 		return 0;
 
-	sup_dev = get_dev_from_fwnode(&sup_np->fwnode);
+	fwnode_link_add(fwnode, of_fwnode_handle(sup_np));
 	of_node_put(sup_np);
-
-	/*
-	 * Return -ENODEV if the PCI graphics controller device hasn't been
-	 * registered yet.  This ensures that efifb isn't allowed to probe
-	 * and this function is retried again when new devices are
-	 * registered.
-	 */
-	if (!sup_dev)
-		return -ENODEV;
-
-	/*
-	 * If this fails, retrying this function at a later point won't
-	 * change anything. So, don't return an error after this.
-	 */
-	if (!device_link_add(dev, sup_dev, fw_devlink_get_flags()))
-		dev_warn(dev, "device_link_add() failed\n");
-
-	put_device(sup_dev);
 
 	return 0;
 }
@@ -362,9 +339,7 @@ static const struct fwnode_operations efifb_fwnode_ops = {
 	.add_links = efifb_add_links,
 };
 
-static struct fwnode_handle efifb_fwnode = {
-	.ops = &efifb_fwnode_ops,
-};
+static struct fwnode_handle efifb_fwnode;
 
 static int __init register_gop_device(void)
 {
@@ -378,8 +353,10 @@ static int __init register_gop_device(void)
 	if (!pd)
 		return -ENOMEM;
 
-	if (IS_ENABLED(CONFIG_PCI))
+	if (IS_ENABLED(CONFIG_PCI)) {
+		fwnode_init(&efifb_fwnode, &efifb_fwnode_ops);
 		pd->dev.fwnode = &efifb_fwnode;
+	}
 
 	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
 	if (err)

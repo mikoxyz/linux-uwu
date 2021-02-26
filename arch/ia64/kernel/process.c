@@ -34,7 +34,6 @@
 #include <linux/utsname.h>
 #include <linux/tracehook.h>
 #include <linux/rcupdate.h>
-#include <generated/package.h>
 
 #include <asm/cpu.h>
 #include <asm/delay.h>
@@ -102,9 +101,9 @@ show_regs (struct pt_regs *regs)
 	print_modules();
 	printk("\n");
 	show_regs_print_info(KERN_DEFAULT);
-	printk("psr : %016lx ifs : %016lx ip  : [<%016lx>]    %s (%s%s)\n",
+	printk("psr : %016lx ifs : %016lx ip  : [<%016lx>]    %s (%s)\n",
 	       regs->cr_ipsr, regs->cr_ifs, ip, print_tainted(),
-	       init_utsname()->release, LINUX_PACKAGE_ID);
+	       init_utsname()->release);
 	printk("ip is at %pS\n", (void *)ip);
 	printk("unat: %016lx pfs : %016lx rsc : %016lx\n",
 	       regs->ar_unat, regs->ar_pfs, regs->ar_rsc);
@@ -172,7 +171,8 @@ do_notify_resume_user(sigset_t *unused, struct sigscratch *scr, long in_syscall)
 	}
 
 	/* deal with pending signal delivery */
-	if (test_thread_flag(TIF_SIGPENDING)) {
+	if (test_thread_flag(TIF_SIGPENDING) ||
+	    test_thread_flag(TIF_NOTIFY_SIGNAL)) {
 		local_irq_enable();	/* force interrupt enable */
 		ia64_do_signal(scr, in_syscall);
 	}
@@ -488,7 +488,7 @@ do_copy_task_regs (struct task_struct *task, struct unw_frame_info *info, void *
 	unw_get_ar(info, UNW_AR_SSD, &dst[56]);
 }
 
-void
+static void
 do_copy_regs (struct unw_frame_info *info, void *arg)
 {
 	do_copy_task_regs(current, info, arg);

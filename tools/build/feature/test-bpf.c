@@ -35,10 +35,8 @@ int main(void)
 	attr.prog_flags = 0;
 
 	/*
-	 * bwh: Don't use the bpf() syscall as we might be building on a
-	 * much older kernel.  Do "use" the attr structure here to avoid
-	 * a "set but not used" warning.
+	 * Test existence of __NR_bpf and BPF_PROG_LOAD.
+	 * This call should fail if we run the testcase.
 	 */
-	(void)&attr;
-	return 0;
+	return syscall(__NR_bpf, BPF_PROG_LOAD, &attr, sizeof(attr));
 }
