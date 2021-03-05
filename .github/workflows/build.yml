@@ -18,5 +18,8 @@ jobs:
     - name: Install Clang
       uses: egor-tensin/setup-clang@v1
       
+    - name: build-dpes
+      run: apt build-dep linux
+      
     - name: build
-      run: ./build.sh
+      run: ./build.sh --actions
