@@ -19,7 +19,7 @@ jobs:
       uses: egor-tensin/setup-clang@v1
       
     - name: build-dpes
-      run: apt build-dep linux
+      run: sudo apt-get build-dep linux
       
     - name: build
       run: ./build.sh --actions
