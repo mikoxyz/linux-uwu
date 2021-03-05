@@ -26,7 +26,7 @@ while true; do
 		sudo apt-get update; sudo apt-get install build-essential llvm lld\
 		clang -y; sudo apt-get build-dep linux -y
 		break
-	elif [ "$input" = "n" ]; then
+	elif [ "$input" = "n" || $1 = "--actions" ]; then
 		break
 	elif [ "$input" != "y" ] || [ "$input" != "n" ]; then
 		printf "Please enter 'y' or 'n'.\n"
