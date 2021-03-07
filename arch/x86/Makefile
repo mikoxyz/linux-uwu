@@ -127,7 +127,6 @@ else
         cflags-$(CONFIG_MEXCAVATOR) += $(call cc-option,-mno-tbm)
         cflags-$(CONFIG_MZEN) += $(call cc-option,-march=znver1)
         cflags-$(CONFIG_MZEN2) += $(call cc-option,-march=znver2)
-        cflags-$(CONFIG_MZEN3) += $(call cc-option,-march=znver3)
         cflags-$(CONFIG_MPSC) += $(call cc-option,-march=nocona)
 
         cflags-$(CONFIG_MCORE2) += \

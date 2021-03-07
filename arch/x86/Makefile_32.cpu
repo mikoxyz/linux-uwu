@@ -37,7 +37,6 @@ cflags-$(CONFIG_MSTEAMROLLER)	+= $(call cc-option,-march=bdver3,-march=athlon)
 cflags-$(CONFIG_MEXCAVATOR)	+= $(call cc-option,-march=bdver4,-march=athlon)
 cflags-$(CONFIG_MZEN)	+= $(call cc-option,-march=znver1,-march=athlon)
 cflags-$(CONFIG_MZEN2)	+= $(call cc-option,-march=znver2,-march=athlon)
-cflags-$(CONFIG_MZEN3)	+= $(call cc-option,-march=znver3,-march=athlon)
 cflags-$(CONFIG_MCRUSOE)	+= -march=i686 -falign-functions=0 -falign-jumps=0 -falign-loops=0
 cflags-$(CONFIG_MEFFICEON)	+= -march=i686 $(call tune,pentium3) -falign-functions=0 -falign-jumps=0 -falign-loops=0
 cflags-$(CONFIG_MWINCHIPC6)	+= $(call cc-option,-march=winchip-c6,-march=i586)
