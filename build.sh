@@ -1,7 +1,7 @@
 #!/bin/sh
 
 KVER=5.11.0
-PKGVER=4
+PKGVER=5
 
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
