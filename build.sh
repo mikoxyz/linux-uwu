@@ -41,12 +41,9 @@ git clone git@github.com:mikoxyz/linux-uwu-configs
 if lscpu | grep -q Ryzen; then
 	printf "Copying the Ryzen config to .config...\n"
 	cp linux-uwu-configs/config-${KVER}-uwu-znver1 .config
-elif lscpu | grep -q Intel; then
-	printf "Copying the Intel config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu-intel .config
-elif :; then
-	printf "Copying the generic config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu-generic .config
+else
+	printf "Copying the native config to .config...\n"
+	cp linux-uwu-configs/config-${KVER}-uwu-native .config
 fi
 
 printf "Starting the build...\n"
