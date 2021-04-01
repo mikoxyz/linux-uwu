@@ -28,7 +28,7 @@ while true; do
 		break
 	elif [ "$input" = "n" ]; then
 		break
-	elif [ "$input" != "y" ] || [ "$input" != "n" ]; then
+	else
 		printf "Please enter 'y' or 'n'.\n"
 	fi
 done
@@ -41,9 +41,12 @@ git clone git@github.com:mikoxyz/linux-uwu-configs
 if lscpu | grep -q Ryzen; then
 	printf "Copying the Ryzen config to .config...\n"
 	cp linux-uwu-configs/config-${KVER}-uwu-znver1 .config
-else
-	printf "Copying the native config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu-native .config
+elif lscpu | grep -q AMD; then
+	printf "Copying the AMD-native config to .config...\n"	
+	cp linux-uwu-configs/config-${KVER}-uwu-native-amd .config
+elif lscpu | grep -q Intel; then
+	printf "Copying the Intel-native config to .config...\n"
+	cp linux-uwu-configs/config-${KVER}-uwu-native-intel .config
 fi
 
 printf "Starting the build...\n"
