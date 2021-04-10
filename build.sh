@@ -41,13 +41,13 @@ git clone git@github.com:mikoxyz/linux-uwu-configs
 # TODO: Check znver
 if lscpu | grep -q Ryzen; then
 	printf "Copying the Ryzen config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu-znver1 .config
+	cp linux-uwu-configs/config-${KVER}.${PTCHLVL}-uwu-znver1 .config
 elif lscpu | grep -q AMD; then
 	printf "Copying the AMD-native config to .config...\n"	
-	cp linux-uwu-configs/config-${KVER}-uwu-native-amd .config
+	cp linux-uwu-configs/config-${KVER}.${PTCHLVL}-uwu-native-amd .config
 elif lscpu | grep -q Intel; then
 	printf "Copying the Intel-native config to .config...\n"
-	cp linux-uwu-configs/config-${KVER}-uwu-native-intel .config
+	cp linux-uwu-configs/config-${KVER}.${PTCHLVL}-uwu-native-intel .config
 fi
 
 printf "Starting the build...\n"
