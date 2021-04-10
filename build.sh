@@ -7,17 +7,17 @@ PKGVER=1
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
 	printf "git is either not installed on your system or in your path.\
-	Please install git using your package manager or add git to your path.\n"
+Please install git using your package manager or add git to your path.\n"
 	exit 1
 fi
 
 # Run figlet if it's present
 if [ -x "$(command -v figlet)" ]; then
-	figlet linux-uwu $KVER
+	figlet linux-uwu $KVER.$PTCHLVL
 fi
 
 printf "Welcome to the linux-uwu build script!\n\
-	Do you want to install the build dependencies? [y/n] "
+Do you want to install the build dependencies? [y/n] "
 
 # This is probably really hacky, but it works ¯\_(ツ)_/¯
 while true; do
