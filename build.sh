@@ -1,12 +1,13 @@
 #!/bin/sh
 
-KVER=5.11.0
-PKGVER=8
+KVER=5.11
+PTCHLVL=13
+PKGVER=1
 
 # Check if git is installed
 if ! [ -x "$(command -v git)" ]; then
 	printf "git is either not installed on your system or in your path.\
-Please install git using your package manager or add git to your path.\n"
+	Please install git using your package manager or add git to your path.\n"
 	exit 1
 fi
 
@@ -16,7 +17,7 @@ if [ -x "$(command -v figlet)" ]; then
 fi
 
 printf "Welcome to the linux-uwu build script!\n\
-Do you want to install the build dependencies? [y/n] "
+	Do you want to install the build dependencies? [y/n] "
 
 # This is probably really hacky, but it works ¯\_(ツ)_/¯
 while true; do
@@ -50,8 +51,9 @@ elif lscpu | grep -q Intel; then
 fi
 
 printf "Starting the build...\n"
-make CC=clang LLVM=1 LLVM_IAS=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}-uwu-${PKGVER}
+make CC=clang LLVM=1 LLVM_IAS=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}.${PTCHLVL}-uwu-${PKGVER}
 unset KVER
+unset PTCHLVL
 unset PKGVER
 printf "Done!\n"
 
