@@ -51,7 +51,7 @@ elif lscpu | grep -q Intel; then
 fi
 
 printf "Starting the build...\n"
-make CC=clang LLVM=1 LLVM_IAS=1 -j`nproc` bindeb-pkg KDEB_PKGVERSION=${KVER}.${PTCHLVL}-uwu-${PKGVER}
+make CC=clang LLVM=1 LLVM_IAS=1 -j`nproc` bindeb-pkg LOCALVERSION=-uwu KDEB_PKGVERSION=${KVER}.${PTCHLVL}-uwu-${PKGVER}
 unset KVER
 unset PTCHLVL
 unset PKGVER
