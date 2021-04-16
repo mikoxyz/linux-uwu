@@ -1,7 +1,7 @@
 #!/bin/sh
 
 KVER=5.11
-PTCHLVL=14
+PTCHLVL=15
 PKGVER=1
 
 # Check if git is installed
